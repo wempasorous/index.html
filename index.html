@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday Surprise</title>
+
+  <style>
+    :root {
+      --primary: #ff4f81;
+      --secondary: #7b61ff;
+      --dark: #242038;
+      --light: #fff7fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: var(--dark);
+      background:
+        radial-gradient(circle at top left, #ffd6e7, transparent 35%),
+        linear-gradient(135deg, #fff7fb, #eee9ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    .screen,
+    .slide-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 26px;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 15px 45px rgba(70, 45, 100, 0.16);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    h1 {
+      margin: 8px 0 14px;
+      font-size: 32px;
+    }
+
+    h2 {
+      margin: 12px 0;
+      font-size: 25px;
+    }
+
+    p {
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .emoji {
+      font-size: 58px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #ead9e5;
+      border-radius: 14px;
+      font-size: 16px;
+      margin: 14px 0 8px;
+      outline: none;
+      text-align: center;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      margin: 6px 3px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      transition: transform 0.2s, opacity 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary-btn {
+      color: var(--dark);
+      background: #f0eafa;
+    }
+
+    .error {
+      color: #d9275f;
+      min-height: 22px;
+      font-weight: bold;
+    }
+
+    .progress {
+      height: 8px;
+      background: #eee6f4;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 0 0 18px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.3s;
+    }
+
+    .slide-number {
+      color: #8b7898;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .slide-image {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 18px;
+      margin: 12px 0;
+    }
+
+    .question-box {
+      margin-top: 18px;
+      padding: 17px;
+      background: #fff1f7;
+      border-radius: 18px;
+    }
+
+    .options {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .option {
+      width: 100%;
+      color: var(--dark);
+      background: white;
+      border: 2px solid #f0dce9;
+    }
+
+    .option.correct {
+      color: #126b3d;
+      background: #dff8e9;
+      border-color: #5ec98b;
+    }
+
+    .option.wrong {
+      color: #a3213d;
+      background: #ffe1e8;
+      border-color: #ef7f98;
+    }
+
+    .feedback {
+      min-height: 25px;
+      font-weight: bold;
+      margin: 10px 0 0;
+    }
+
+    .navigation {
+      margin-top: 18px;
+    }
+
+    .final-message {
+      background: linear-gradient(135deg, #fff0f7, #eeeaff);
+      padding: 18px;
+      border-radius: 18px;
+      margin-top: 18px;
+    }
+
+    .heart {
+      color: var(--primary);
+      font-size: 38px;
+      animation: beat 1s infinite;
+    }
+
+    @keyframes beat {
+      50% {
+        transform: scale(1.2);
+      }
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      width: 10px;
+      height: 16px;
+      animation: fall 3s linear forwards;
+      z-index: 20;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- PASSWORD SCREEN -->
+    <section id="passwordScreen" class="screen">
+      <div class="emoji">🎁</div>
+      <h1>Ek secret surprise hai</h1>
+      <p>Website open karne ke liye secret password enter karo.</p>
+
+      <input id="passwordInput" type="password" placeholder="Secret password">
+      <button onclick="unlockWebsite()">Unlock Surprise</button>
+
+      <p id="passwordError" class="error"></p>
+    </section>
+
+    <!-- MAIN WEBSITE -->
+    <section id="mainWebsite" class="hidden">
+      <div class="slide-card">
+        <div class="progress">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div id="slideNumber" class="slide-number"></div>
+        <div id="slideContent"></div>
+
+        <div class="navigation">
+          <button id="previousButton" class="secondary-btn" onclick="previousSlide()">
+            ← Previous
+          </button>
+
+          <button id="nextButton" onclick="nextSlide()">
+            Next →
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /*
+      ================================
+      EASY EDITING AREA
+      YAHAN SE WEBSITE CUSTOMIZE KARO
+      ================================
+    */
+
+    // 1. Password yahan change karo
+    const SECRET_PASSWORD = "birthday123";
+
+    // 2. Birthday person ka naam yahan change karo
+    const PERSON_NAME = "Your Special Person";
+
+    // 3. Slides yahan add/remove/edit karo
+    const slides = [
+      {
+        type: "welcome",
+        title: `Hey ${PERSON_NAME} 🎂`,
+        text: "Tumhare liye ek chhota sa special birthday surprise hai. Ready ho?",
+        emoji: "✨"
+      },
+
+      {
+        type: "message",
+        title: "Aaj ka din special hai 💖",
+        text: "Kyunki aaj ek bahut amazing person ka birthday hai. Tumhari smile hamesha aisi hi rahe!",
+        emoji: "🥳"
+      },
+
+      {
+        type: "photo",
+        title: "Ek beautiful memory 📸",
+        text: "Yahan tum apni photo add kar sakte ho.",
+        image: "https://placehold.co/900x500/ffd6e7/7b3158?text=Add+Your+Photo"
+      },
+
+      {
+        type: "quiz",
+        title: "Question 1 🤔",
+        question: "Tumhe sabse zyada kya deserve hai?",
+        options: [
+          "Happiness",
+          "Success",
+          "Unlimited chocolates",
+          "Sab kuch ❤️"
+        ],
+        correct: 3
+      },
+
+      {
+        type: "quiz",
+        title: "Question 2 😄",
+        question: "Birthday par sabse important cheez kya hai?",
+        options: [
+          "Cake",
+          "Friends",
+          "Surprise",
+          "Happy rehna"
+        ],
+        correct: 3
+      },
+
+      {
+        type: "message",
+        title: "One more thing 💌",
+        text: "Chahe life mein kuch bhi ho, hamesha yaad rakhna ki tum bahut special ho.",
+        emoji: "🌸"
+      },
+
+      {
+        type: "final",
+        title: `Happy Birthday, ${PERSON_NAME}! 🎉`,
+        text: "May your life be filled with happiness, success, love and beautiful memories.",
+        finalMessage: "I hope this little surprise made you smile. Have the most wonderful birthday! ❤️"
+      }
+    ];
+
+    /*
+      ================================
+      WEBSITE LOGIC
+      IS PART KO BINA ZAROORAT EDIT NA KARO
+      ================================
+    */
+
+    let currentSlide = 0;
+
+    function unlockWebsite() {
+      const enteredPassword =
+        document.getElementById("passwordInput").value;
+
+      if (enteredPassword === SECRET_PASSWORD) {
+        document.getElementById("passwordScreen").classList.add("hidden");
+        document.getElementById("mainWebsite").classList.remove("hidden");
+
+        showSlide();
+      } else {
+        document.getElementById("passwordError").textContent =
+          "Password incorrect hai. Dobara try karo.";
+      }
+    }
+
+    function showSlide() {
+      const slide = slides[currentSlide];
+      const content = document.getElementById("slideContent");
+
+      document.getElementById("slideNumber").textContent =
+        `Slide ${currentSlide + 1} of ${slides.length}`;
+
+      document.getElementById("progressBar").style.width =
+        `${((currentSlide + 1) / slides.length) * 100}%`;
+
+      document.getElementById("previousButton").disabled =
+        currentSlide === 0;
+
+      document.getElementById("nextButton").textContent =
+        currentSlide === slides.length - 1 ? "Celebrate 🎉" : "Next →";
+
+      if (slide.type === "welcome") {
+        content.innerHTML = `
+          <div class="emoji">${slide.emoji}</div>
+          <h1>${slide.title}</h1>
+          <p>${slide.text}</p>
+        `;
+      }
+
+      if (slide.type === "message") {
+        content.innerHTML = `
+          <div class="emoji">${slide.emoji}</div>
+          <h2>${slide.title}</h2>
+          <p>${slide.text}</p>
+        `;
+      }
+
+      if (slide.type === "photo") {
+        content.innerHTML = `
+          <h2>${slide.title}</h2>
+          <img class="slide-image" src="${slide.image}" alt="Birthday memory">
+          <p>${slide.text}</p>
+        `;
+      }
+
+      if (slide.type === "quiz") {
+        content.innerHTML = `
+          <h2>${slide.title}</h2>
+
+          <div class="question-box">
+            <p><strong>${slide.question}</strong></p>
+
+            <div class="options">
+              ${slide.options.map((option, index) => `
+                <button class="option"
+                  onclick="checkAnswer(${index}, ${slide.correct}, this)">
+                  ${option}
+                </button>
+              `).join("")}
+            </div>
+
+            <p id="feedback" class="feedback"></p>
+          </div>
+        `;
+      }
+
+      if (slide.type === "final") {
+        content.innerHTML = `
+          <div class="heart">♥</div>
+          <h1>${slide.title}</h1>
+          <p>${slide.text}</p>
+
+          <div class="final-message">
+            <p>${slide.finalMessage}</p>
+          </div>
+        `;
+
+        createConfetti();
+      }
+    }
+
+    function checkAnswer(selected, correct, button) {
+      const allOptions = document.querySelectorAll(".option");
+      const feedback = document.getElementById("feedback");
+
+      allOptions.forEach(option => {
+        option.disabled = true;
+      });
+
+      if (selected === correct) {
+        button.classList.add("correct");
+        feedback.textContent = "Bilkul correct! Tumhe sab pata hai 😍";
+        createConfetti();
+      } else {
+        button.classList.add("wrong");
+        feedback.textContent =
+          "Oops! Answer galat hai, lekin tum phir bhi special ho ❤️";
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        showSlide();
+      } else {
+        createConfetti();
+      }
+    }
+
+    function previousSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        showSlide();
+      }
+    }
+
+    function createConfetti() {
+      const colors = ["#ff4f81", "#7b61ff", "#ffc857", "#49c878", "#45b7d1"];
+
+      for (let i = 0; i < 35; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background =
+          colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = Math.random() * 0.8 + "s";
+
+        document.body.appendChild(piece);
+
+        setTimeout(() => {
+          piece.remove();
+        }, 4000);
+      }
+    }
+  </script>
+</body>
+</html>
